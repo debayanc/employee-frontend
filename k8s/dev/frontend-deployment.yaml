@@ -20,8 +20,8 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: employee-frontend:latest
-        imagePullPolicy: IfNotPresent
+        image: debayanc/employee-frontend:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
         resources:

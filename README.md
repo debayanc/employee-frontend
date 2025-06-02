@@ -33,7 +33,7 @@ You can run this frontend locally using Docker:
 ./build.sh
 
 # Run the container
-docker run -p 8080:80 employee-frontend:latest
+docker run -p 8080:80 debayanc/employee-frontend:latest
 ```
 
 Then access the application at http://localhost:8080
@@ -43,6 +43,9 @@ Then access the application at http://localhost:8080
 ```bash
 # Build the Docker image
 ./build.sh
+
+# Build and push to Docker Hub
+./build.sh --push
 ```
 
 ## Deployment
@@ -60,6 +63,10 @@ Then access the application at http://localhost:8080
 # Deploy to production environment
 ./deploy-prod.sh
 ```
+
+## CI/CD
+
+This repository uses GitHub Actions to automatically build and push the Docker image to Docker Hub. See the `.github/workflows` directory for details.
 
 ## API Integration
 
