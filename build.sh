@@ -1,15 +1,9 @@
 #!/bin/bash
 set -e
 
-# Build the Docker image
-echo "Building frontend Docker image..."
-docker build -t debayanc/employee-frontend:latest .
-
-echo "Frontend Docker image built successfully!"
-
-# Optionally push to Docker Hub
-if [ "$1" == "--push" ]; then
-  echo "Pushing image to Docker Hub..."
-  docker push debayanc/employee-frontend:latest
-  echo "Image pushed successfully!"
-fi
+echo "Using nginx:alpine image from Docker Hub"
+echo "No need to build a custom image as we're using ConfigMaps for content"
+echo ""
+echo "To deploy:"
+echo "  ./deploy-dev.sh    # For development environment"
+echo "  ./deploy-prod.sh   # For production environment"

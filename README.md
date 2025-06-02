@@ -29,23 +29,26 @@ employee-frontend/
 You can run this frontend locally using Docker:
 
 ```bash
-# Build the Docker image
-./build.sh
+# Create a directory for the static files
+mkdir -p static
 
-# Run the container
-docker run -p 8080:80 debayanc/employee-frontend:latest
+# Copy the source files to the static directory
+cp -r src/* static/
+
+# Run the container with the static files mounted
+docker run -p 8080:80 -v $(pwd)/static:/usr/share/nginx/html -v $(pwd)/nginx/default.conf:/etc/nginx/conf.d/default.conf nginx:alpine
 ```
 
 Then access the application at http://localhost:8080
 
-### Building
+### Kubernetes Deployment
+
+We use ConfigMaps to provide the content and configuration to the nginx:alpine image:
 
 ```bash
-# Build the Docker image
-./build.sh
-
-# Build and push to Docker Hub
-./build.sh --push
+# Deploy to development or production
+./deploy-dev.sh
+./deploy-prod.sh
 ```
 
 ## Deployment

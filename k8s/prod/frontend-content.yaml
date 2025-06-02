@@ -1,0 +1,177 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-content
+  namespace: employee-prod
+  labels:
+    app: employee-service
+    tier: frontend
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Employee Management</title>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <div class="container">
+            <h1>Employee Management System</h1>
+            
+            <div id="loading" class="loading">Loading employees...</div>
+            <div id="error" class="error" style="display: none;"></div>
+            
+            <div id="employee-list" class="employee-list"></div>
+            
+            <div class="button-container">
+                <button id="refresh-btn" class="btn">Refresh</button>
+            </div>
+        </div>
+
+        <script src="app.js"></script>
+    </body>
+    </html>
+  styles.css: |
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f5f5f5;
+    }
+    
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+        color: #333;
+        text-align: center;
+    }
+    
+    .employee-list {
+        margin-top: 20px;
+    }
+    
+    .employee-card {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        transition: transform 0.2s ease;
+    }
+    
+    .employee-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .employee-card h3 {
+        margin-top: 0;
+        color: #444;
+    }
+    
+    .loading {
+        text-align: center;
+        color: #666;
+        padding: 20px;
+    }
+    
+    .error {
+        color: #d32f2f;
+        text-align: center;
+        padding: 10px;
+        background-color: #ffebee;
+        border-radius: 4px;
+        margin: 10px 0;
+    }
+    
+    .button-container {
+        margin-top: 20px;
+        text-align: center;
+    }
+    
+    .btn {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+    }
+    
+    .btn:hover {
+        background-color: #45a049;
+    }
+  app.js: |
+    document.addEventListener('DOMContentLoaded', function() {
+        loadEmployees();
+        
+        document.getElementById('refresh-btn').addEventListener('click', function() {
+            loadEmployees();
+        });
+    });
+    
+    function loadEmployees() {
+        const loadingElement = document.getElementById('loading');
+        const errorElement = document.getElementById('error');
+        const employeeListElement = document.getElementById('employee-list');
+        
+        loadingElement.style.display = 'block';
+        errorElement.style.display = 'none';
+        employeeListElement.innerHTML = '';
+        
+        fetch('/api/employees')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                loadingElement.style.display = 'none';
+                
+                // Handle different response formats
+                let employees = data;
+                
+                // Check if the response is wrapped in a data property
+                if (data && data._embedded && data._embedded.employees) {
+                    employees = data._embedded.employees;
+                }
+                
+                // Ensure employees is an array
+                if (!Array.isArray(employees)) {
+                    employees = [employees];
+                }
+                
+                if (employees.length === 0) {
+                    employeeListElement.innerHTML = '<p>No employees found.</p>';
+                    return;
+                }
+                
+                employees.forEach(employee => {
+                    const employeeCard = document.createElement('div');
+                    employeeCard.className = 'employee-card';
+                    employeeCard.innerHTML = `
+                        <h3>${employee.firstName || ''} ${employee.lastName || ''}</h3>
+                        <p><strong>ID:</strong> ${employee.id || 'N/A'}</p>
+                        <p><strong>Role:</strong> ${employee.role || 'N/A'}</p>
+                    `;
+                    employeeListElement.appendChild(employeeCard);
+                });
+            })
+            .catch(error => {
+                loadingElement.style.display = 'none';
+                errorElement.style.display = 'block';
+                errorElement.textContent = 'Error loading employees: ' + error.message;
+                console.error('Error details:', error);
+            });
+    }
